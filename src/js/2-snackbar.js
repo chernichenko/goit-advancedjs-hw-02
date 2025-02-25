@@ -1,13 +1,11 @@
 import iziToast from "izitoast";
 import "izitoast/dist/css/iziToast.min.css";
 
-// Find the form elements
 const form = document.querySelector('.form');
 const delayInput = form.querySelector('[name="delay"]');
 const stateRadio = form.querySelectorAll('[name="state"]');
 const button = form.querySelector('button');
 
-// Handle form submission
 form.addEventListener('submit', (event) => {
   event.preventDefault();
   
