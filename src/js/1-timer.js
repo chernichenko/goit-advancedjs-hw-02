@@ -4,20 +4,28 @@ import "flatpickr/dist/flatpickr.min.css";
 import "izitoast/dist/css/iziToast.min.css";
 
 let userSelectedDate;
+let timerInterval;
 
-flatpickr("#datetime-picker", {
+const startButton = document.querySelector('[data-start]');
+const datePicker = document.getElementById("datetime-picker");
+const daysEl = document.querySelector('[data-days]');
+const hoursEl = document.querySelector('[data-hours]');
+const minutesEl = document.querySelector('[data-minutes]');
+const secondsEl = document.querySelector('[data-seconds]');
+
+startButton.disabled = true;
+
+flatpickr(datePicker, {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
     userSelectedDate = selectedDates[0];
-    const startButton = document.querySelector('[data-start]');
+
     if (userSelectedDate < new Date()) {
       startButton.disabled = true;
-      iziToast.error({
-        message: "Please choose a date in the future",
-      });
+      iziToast.error({ message: "Please choose a date in the future" });
     } else {
       startButton.disabled = false;
     }
@@ -34,12 +42,12 @@ function convertMs(ms) {
   const hour = minute * 60;
   const day = hour * 24;
 
-  const days = Math.floor(ms / day);
-  const hours = Math.floor((ms % day) / hour);
-  const minutes = Math.floor(((ms % day) % hour) / minute);
-  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-
-  return { days, hours, minutes, seconds };
+  return {
+    days: Math.floor(ms / day),
+    hours: Math.floor((ms % day) / hour),
+    minutes: Math.floor(((ms % day) % hour) / minute),
+    seconds: Math.floor((((ms % day) % hour) % minute) / second),
+  };
 }
 
 function updateTimer() {
@@ -48,22 +56,23 @@ function updateTimer() {
 
   if (timeDifference <= 0) {
     clearInterval(timerInterval);
+    startButton.disabled = false;
+    datePicker.disabled = false;
     return;
   }
 
   const { days, hours, minutes, seconds } = convertMs(timeDifference);
 
-  document.querySelector('[data-days]').textContent = addLeadingZero(days);
-  document.querySelector('[data-hours]').textContent = addLeadingZero(hours);
-  document.querySelector('[data-minutes]').textContent = addLeadingZero(minutes);
-  document.querySelector('[data-seconds]').textContent = addLeadingZero(seconds);
+  daysEl.textContent = addLeadingZero(days);
+  hoursEl.textContent = addLeadingZero(hours);
+  minutesEl.textContent = addLeadingZero(minutes);
+  secondsEl.textContent = addLeadingZero(seconds);
 }
 
-let timerInterval;
-
-document.querySelector('[data-start]').addEventListener("click", () => {
-  document.querySelector('[data-start]').disabled = true;
-  document.getElementById("datetime-picker").disabled = true;
+startButton.addEventListener("click", () => {
+  startButton.disabled = true;
+  datePicker.disabled = true;
 
   timerInterval = setInterval(updateTimer, 1000);
+  updateTimer();
 });
